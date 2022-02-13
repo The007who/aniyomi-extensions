@@ -72,13 +72,12 @@ class AsianLoad : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
     override fun episodeFromElement(element: Element): SEpisode {
         val episode = SEpisode.create()
         episode.setUrlWithoutDomain(element.attr("href"))
-        episode.name = "Episode: " + element.attr("href").substringAfter("episode-")
-        val epNum = getNumberFromEpsString(element.attr("href").substringAfter("episode-"))
+        episode.name = element.select("div.type span").text() + " Episode: " + element.select("div.name").text().substringAfter("episode-")
+        val epNum = element.select("div.name").text().substringAfter("Episode ")
         episode.episode_number = when {
             (epNum.isNotEmpty()) -> epNum.toFloat()
             else -> 1F
         }
-        //episode.episode_number = element.attr("href").substringAfter("episode-").toFloat()
         // episode.date_upload = element.select("div.meta span.date").text()
         return episode
     }
@@ -127,6 +126,9 @@ class AsianLoad : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
                     val callMaster = client.newCall(GET(master, nheaders)).execute().asJsoup()
                     Log.i("testt", "$callMaster")*/
                     val headers = headers.newBuilder()
+                        // .set("Referer", "https://sbplay2.com/")
+                        .set("User-Agent", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:96.0) Gecko/20100101 Firefox/96.0")
+                        .set("Accept-Language", "en-US,en;q=0.5")
                         .set("watchsb", "streamsb")
                         .build()
                     val videos = StreamSBExtractor(client).videosFromUrl(url, headers)
@@ -255,8 +257,8 @@ class AsianLoad : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
         val videoQualityPref = ListPreference(screen.context).apply {
             key = "preferred_quality"
             title = "Preferred quality"
-            entries = arrayOf("1080p", "720p", "480p", "360p")
-            entryValues = arrayOf("1080", "720", "480", "360")
+            entries = arrayOf("1080p", "720p", "480p", "360p", "Doodstream", "StreamTape")
+            entryValues = arrayOf("1080", "720", "480", "360", "Doodstream", "StreamTape")
             setDefaultValue("1080")
             summary = "%s"
 
